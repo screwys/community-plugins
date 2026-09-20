@@ -1,0 +1,114 @@
+id = "screwys/todotxt"
+name = "todo.txt"
+version = "1.0.0"
+plugin_api = 28
+author = "screwys"
+license = "MIT"
+dependencies = []
+tags = ["bar", "panel", "productivity"]
+icon = "list-check"
+description = "A fast, keyboard-friendly todo.txt task manager for your bar."
+
+[[setting]]
+key = "todo_file"
+type = "file"
+label_key = "settings.todo_file.label"
+description_key = "settings.todo_file.description"
+default = ""
+extensions = [".txt"]
+
+[[setting]]
+key = "add_creation_date"
+type = "bool"
+label_key = "settings.add_creation_date.label"
+description_key = "settings.add_creation_date.description"
+default = true
+
+[[setting]]
+key = "default_sort"
+type = "select"
+label_key = "settings.default_sort.label"
+description_key = "settings.default_sort.description"
+default = "manual"
+
+  [[setting.options]]
+  value = "manual"
+  label_key = "settings.default_sort.options.manual"
+
+  [[setting.options]]
+  value = "priority"
+  label_key = "settings.default_sort.options.priority"
+
+  [[setting.options]]
+  value = "due"
+  label_key = "settings.default_sort.options.due"
+
+[[panel]]
+id = "panel"
+entry = "panel.luau"
+width = 585
+height = 540
+placement = "floating"
+position = "center"
+open_near_click = true
+keyboard_focus = "exclusive"
+capture_keys = [
+  "n", "ctrl+n", "ctrl+f", "j", "k", "down", "up", "left", "right", "home", "end",
+  "x", "e", "c", "y", "d", "delete", "shift+up", "shift+down", "ctrl+h"
+]
+
+[[widget]]
+id = "bar"
+entry = "bar.luau"
+
+  [widget.actions]
+  left = "panel-toggle screwys/todotxt:panel"
+
+  [[widget.setting]]
+  key = "glyph"
+  type = "glyph"
+  label_key = "settings.glyph.label"
+  description_key = "settings.glyph.description"
+  default = "list-check"
+
+  [[widget.setting]]
+  key = "display"
+  type = "select"
+  label_key = "settings.display.label"
+  description_key = "settings.display.description"
+  default = "count"
+
+    [[widget.setting.options]]
+    value = "icon"
+    label_key = "settings.display.options.icon"
+
+    [[widget.setting.options]]
+    value = "count"
+    label_key = "settings.display.options.count"
+
+    [[widget.setting.options]]
+    value = "next"
+    label_key = "settings.display.options.next"
+
+  [[widget.setting]]
+  key = "max_title_length"
+  type = "int"
+  label_key = "settings.max_title_length.label"
+  description_key = "settings.max_title_length.description"
+  default = 28
+  min = 8
+  max = 80
+
+  [[widget.setting]]
+  key = "show_due"
+  type = "bool"
+  label_key = "settings.show_due.label"
+  description_key = "settings.show_due.description"
+  default = true
+
+  [[widget.setting]]
+  key = "hide_when_empty"
+  type = "bool"
+  label_key = "settings.hide_when_empty.label"
+  description_key = "settings.hide_when_empty.description"
+  default = false

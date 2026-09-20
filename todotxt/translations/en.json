@@ -1,0 +1,96 @@
+{
+  "title": "todo.txt",
+  "subtitle": "{shown} shown · {open} open",
+  "empty": "Nothing here",
+  "empty_hint": "Clear a filter or press N to add a task.",
+  "add": "Add task",
+  "add_placeholder": "Add a task",
+  "edit_placeholder": "Edit the todo.txt line",
+  "save": "Save",
+  "cancel": "Cancel",
+  "search": "Search",
+  "all_tags": "All projects",
+  "status_open": "Open",
+  "status_all": "All",
+  "status_done": "Completed",
+  "priority_any": "Priority",
+  "priority_none": "No priority",
+  "column_done": "Done",
+  "column_task": "Task",
+  "column_category": "Category",
+  "column_created": "Created",
+  "column_due": "Due",
+  "column_priority": "Priority",
+  "none": "None",
+  "invalid_date": "Use a date like 2026-09-12",
+  "sort_manual": "Manual",
+  "sort_priority": "Priority",
+  "sort_due": "Due",
+  "clear_done": "Clear completed",
+  "confirm_delete": "Delete this task?",
+  "confirm_clear": "Delete all completed tasks?",
+  "delete": "Delete",
+  "copied": "Task copied",
+  "save_failed": "Could not save todo.txt",
+  "tip_complete": "Mark as done (X)",
+  "tip_reopen": "Mark as open (X)",
+  "tip_priority": "Cycle priority",
+  "tip_edit": "Edit task (E)",
+  "tip_copy": "Copy note (C / Y)",
+  "tip_delete": "Delete task (D)",
+  "tip_drag": "Drag to reorder",
+  "tip_add": "Add task (N)",
+  "tip_search": "Focus search (Ctrl+F)",
+  "tip_help": "Keyboard shortcuts (Ctrl+H)",
+  "tip_settings": "Plugin settings",
+  "tip_close": "Close",
+  "help_title": "Keyboard",
+  "help_body": "J/K or arrow keys select. N adds. Ctrl+F searches. X completes. E edits. Y copies. D deletes. Shift+arrow keys move.",
+  "widget_empty": "todo.txt: no open tasks",
+  "widget_count": "{count} open",
+  "widget_tooltip": "todo.txt: {count} open\n{next}",
+  "settings": {
+    "todo_file": {
+      "label": "todo.txt file",
+      "description": "The todo.txt file to read and write. An empty value uses the plugin data directory."
+    },
+    "add_creation_date": {
+      "label": "Add creation dates",
+      "description": "Prefix newly added tasks with today's date when they do not already contain one."
+    },
+    "default_sort": {
+      "label": "Default sort",
+      "description": "The ordering used whenever the panel opens.",
+      "options": {
+        "manual": "Manual order",
+        "priority": "Priority",
+        "due": "Due date"
+      }
+    },
+    "glyph": {
+      "label": "Bar glyph",
+      "description": "The icon shown in the bar."
+    },
+    "display": {
+      "label": "Bar content",
+      "description": "Show only the icon, the open count, or the next task on horizontal bars.",
+      "options": {
+        "icon": "Icon only",
+        "count": "Open count",
+        "next": "Next task"
+      }
+    },
+    "max_title_length": {
+      "label": "Maximum title length",
+      "description": "Maximum characters used for the next task in a horizontal bar."
+    },
+    "show_due": {
+      "label": "Show due date",
+      "description": "Show the next task's due date in a horizontal bar."
+    },
+    "hide_when_empty": {
+      "label": "Hide when empty",
+      "description": "Hide the widget when no open tasks remain."
+    }
+  }
+}
