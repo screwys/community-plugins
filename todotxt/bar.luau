@@ -3,6 +3,7 @@
 local model = require("./model.luau")
 
 local tasks = {}
+local remote = noctalia.state.get("todotxt.remote") or {}
 local reading = false
 local panelOpen = false
 
@@ -44,7 +45,7 @@ local function priorityColor(priority)
     if priority == "A" then return "error" end
     if priority == "B" then return "warning" end
     if priority == "C" then return "tertiary" end
-    return "outline"
+    return "on_surface_variant"
 end
 
 local function isVerticalLayout()
@@ -107,12 +108,17 @@ local function render()
 end
 
 local function refresh()
+    if remote.enabled then
+        tasks = {}
+        for _, row in ipairs(remote.tasks or {}) do tasks[#tasks + 1] = model.parse(row.raw, row.id, true) end
+        render()
+        return
+    end
     if reading then return end
     reading = true
     local accepted = noctalia.readFileAsync(model.defaultPath(), function(data, _err)
         reading = false
-        tasks = model.readText(data, true)
-        render()
+        if not remote.enabled then tasks = model.readText(data, true); render() end
     end)
     if not accepted then reading = false end
 end
@@ -134,6 +140,11 @@ function onConfigChanged()
     refresh()
     render()
 end
+
+noctalia.state.watch("todotxt.remote", function(value)
+    remote = value or {}
+    refresh()
+end)
 
 noctalia.setUpdateInterval(2000)
 refresh()

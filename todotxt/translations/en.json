@@ -91,6 +91,35 @@
     "hide_when_empty": {
       "label": "Hide when empty",
       "description": "Hide the widget when no open tasks remain."
+    },
+    "storage": {
+      "label": "Storage",
+      "options": {
+        "file": "todo.txt",
+        "caldav": "CalDAV"
+      }
+    },
+    "caldav_account": {
+      "label": "CalDAV account"
+    },
+    "caldav_calendar": {
+      "label": "Task calendar URL"
     }
-  }
+  },
+  "remote_origin": "The calendar points to a different server.",
+  "remote_conflict": "A task changed in another client. Reload and try again.",
+  "remote_http": "CalDAV request failed (HTTP {status}).",
+  "remote_unavailable": "CalDAV is unavailable.",
+  "remote_invalid": "Invalid CalDAV response.",
+  "remote_principal": "The server returned no CalDAV principal.",
+  "remote_home": "The server returned no calendar home.",
+  "remote_no_calendar": "No task calendar found.",
+  "remote_choose_calendar": "Choose a task calendar.",
+  "remote_keyring_missing": "Install secret-tool to use CalDAV.",
+  "remote_password": "Save the account password in Noctalia Calendar settings.",
+  "remote_choose_account": "Choose a CalDAV account in plugin settings.",
+  "remote_account_missing": "Add a CalDAV account in Noctalia Calendar settings.",
+  "remote_client_certificate": "Noctalia’s plugin HTTP API cannot use client certificates.",
+  "remote_password_file": "The calendar password file is unavailable or invalid.",
+  "remote_offline": "Noctalia is offline."
 }

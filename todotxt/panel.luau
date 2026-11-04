@@ -1,6 +1,11 @@
 --!nonstrict
 
 local model = require("./model.luau")
+local remote = noctalia.state.get("todotxt.remote") or {}
+local remoteRevision = -1
+local pendingRemote = nil
+local commandSerial = 0
+local opened = false
 
 local DRAG_TYPE = "todotxt-task"
 local PRIORITIES = { "A", "B", "C" }
@@ -102,6 +107,20 @@ local function publishChange()
 end
 
 local function saveTasks()
+    if remote.enabled then
+        if remote.busy or pendingRemote then return false end
+        local recovery = noctalia.pluginDataDir() .. "/caldav-unsaved.txt"
+        local ok, err = model.write(recovery, tasks)
+        if not ok then noctalia.notifyError(tr("title"), err); return false end
+        commandSerial += 1
+        pendingRemote = "save-" .. tostring(os.time()) .. "-" .. commandSerial
+        local rows = {}
+        for _, task in ipairs(tasks) do
+            if not task.transient then rows[#rows + 1] = { id = task.id, raw = task.raw } end
+        end
+        noctalia.state.set("todotxt.request", { id = pendingRemote, action = "save", revision = remoteRevision, tasks = rows })
+        return true
+    end
     local ok, err = model.write(todoPath, tasks)
     if not ok then
         noctalia.notifyError(tr("title"), err or tr("save_failed"))
@@ -113,8 +132,13 @@ local function saveTasks()
 end
 
 local function loadTasks()
-    tasks = model.read(todoPath)
-    nextId = #tasks + 1
+    if remote.enabled then
+        tasks = {}
+        for _, row in ipairs(remote.tasks or {}) do tasks[#tasks + 1] = model.parse(row.raw, row.id) end
+        remoteRevision = remote.revision or 0
+    else tasks = model.read(todoPath) end
+    nextId = 1
+    for _, task in ipairs(tasks) do nextId = math.max(nextId, task.id + 1) end
     diskStamp = model.stamp(todoPath)
     selectedId = nil
 end
@@ -265,6 +289,7 @@ local function sortOptions()
 end
 
 local function replaceTask(task, raw)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local _, index = findTask(task.id)
     if index == nil then return false end
     parseAt(index, raw, task.id)
@@ -286,6 +311,7 @@ local function cyclePriority(task)
 end
 
 local function removeTask(id)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local _, index = findTask(id)
     if index == nil then return end
     table.remove(tasks, index)
@@ -296,6 +322,7 @@ local function removeTask(id)
 end
 
 local function moveTask(id, beforeId)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local task, from = findTask(id)
     if task == nil then return end
     local before = beforeId ~= nil and select(2, findTask(beforeId)) or (#tasks + 1)
@@ -307,6 +334,7 @@ local function moveTask(id, beforeId)
 end
 
 local function moveSelected(offset)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     if sortIndex ~= 0 or selectedId == nil then return end
     local task, index = findTask(selectedId)
     if task == nil then return end
@@ -387,7 +415,7 @@ local function taskCard(task)
             width = PRIORITY_WIDTH,
             height = 14,
             radius = 7,
-            fill = task.priority == "A" and "error" or (task.priority == "B" and "warning" or (task.priority == "C" and "tertiary" or "outline")),
+            fill = task.priority == "A" and "error" or (task.priority == "B" and "warning" or (task.priority == "C" and "tertiary" or "on_surface_variant")),
             onClick = function() selectedId = task.id; cyclePriority(task); render() end,
         }),
         ui.button({
@@ -422,9 +450,9 @@ local function taskCard(task)
         gap = ROW_GAP,
         align = "center",
         padding = CARD_PADDING,
-        fill = selected and "primary/0.12" or "surface_variant/0.28",
+        fill = selected and "primary/0.12" or "surface/0.28",
         radius = 10,
-        border = selected and "primary/0.45" or "outline/0.15",
+        border = selected and "primary/0.45" or "on_surface_variant/0.15",
         borderWidth = CARD_BORDER,
         width = ROW_CONTENT_WIDTH,
         onClick = function() selectedId = task.id; render() end,
@@ -542,6 +570,9 @@ function render()
     end
 
     local parts = { header() }
+    if remote.enabled and remote.error then
+        parts[#parts + 1] = ui.label({ text = remote.error, color = "error", maxLines = 2 })
+    end
     if showHelp then
         parts[#parts + 1] = ui.row({ gap = 8, align = "center", padding = 8, fill = "secondary/0.12", radius = 10 }, {
             ui.glyph({ name = "keyboard", size = 16, color = "secondary" }),
@@ -561,6 +592,8 @@ function render()
 end
 
 function onOpen(context)
+    opened = true
+    remote = noctalia.state.get("todotxt.remote") or {}
     todoPath = model.defaultPath()
     loadTasks()
     rebuildTags()
@@ -581,6 +614,7 @@ function onOpen(context)
 end
 
 function onClose()
+    opened = false
     noctalia.state.set("todotxt.open", false)
 end
 
@@ -595,6 +629,14 @@ function onConfigChanged()
 end
 
 function update()
+    if remote.enabled then
+        if not pendingRemote and editingId == nil and not adding and remoteRevision ~= remote.revision then
+            loadTasks()
+            rebuildTags()
+            render()
+        end
+        return
+    end
     local currentStamp = model.stamp(todoPath)
     if currentStamp ~= diskStamp and not adding and editingId == nil then
         loadTasks()
@@ -604,6 +646,7 @@ function update()
 end
 
 function onAdd()
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local current = findTask(editingId)
     if current ~= nil and current.transient then
         render()
@@ -646,6 +689,7 @@ function onAddSave(value)
 end
 
 function onEdit(id, field)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local task = findTask(tonumber(id) or id)
     if task == nil then return end
     selectedId = task.id
@@ -677,6 +721,7 @@ function onEditCancel()
 end
 
 function onEditSave(value)
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local task, index = findTask(editingId)
     if task == nil then return end
     local field = editingField
@@ -771,6 +816,7 @@ function onClearCancel()
 end
 
 function onClearConfirm()
+    if remote.enabled and (remote.busy or pendingRemote) then return end
     local kept = {}
     for _, task in ipairs(tasks) do
         if not task.completed then kept[#kept + 1] = task end
@@ -922,3 +968,18 @@ function onKey(chord, pressed)
     end
     render()
 end
+
+noctalia.state.watch("todotxt.remote", function(value)
+    local wasRemote = remote.enabled == true
+    remote = value or {}
+    if pendingRemote and remote.request == pendingRemote and not remote.busy then
+        pendingRemote = nil
+        if remote.success then noctalia.removeFile(noctalia.pluginDataDir() .. "/caldav-unsaved.txt")
+        else noctalia.notifyError(tr("title"), remote.error or tr("remote_unavailable")) end
+        loadTasks()
+    elseif wasRemote ~= (remote.enabled == true) then
+        editingId = nil
+        loadTasks()
+    end
+    if opened then render() end
+end)

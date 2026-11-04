@@ -1,6 +1,6 @@
 id = "screwys/todotxt"
 name = "todo.txt"
-version = "1.0.0"
+version = "1.1.0"
 plugin_api = 28
 author = "screwys"
 license = "MIT"
@@ -10,12 +10,41 @@ icon = "list-check"
 description = "A fast, keyboard-friendly todo.txt task manager for your bar."
 
 [[setting]]
+key = "storage"
+type = "select"
+label_key = "settings.storage.label"
+default = "file"
+
+  [[setting.options]]
+  value = "file"
+  label_key = "settings.storage.options.file"
+
+  [[setting.options]]
+  value = "caldav"
+  label_key = "settings.storage.options.caldav"
+
+[[setting]]
+key = "caldav_account"
+type = "string"
+label_key = "settings.caldav_account.label"
+default = ""
+visible_when = { key = "storage", values = ["caldav"] }
+
+[[setting]]
+key = "caldav_calendar"
+type = "string"
+label_key = "settings.caldav_calendar.label"
+default = ""
+visible_when = { key = "storage", values = ["caldav"] }
+
+[[setting]]
 key = "todo_file"
 type = "file"
 label_key = "settings.todo_file.label"
 description_key = "settings.todo_file.description"
 default = ""
 extensions = [".txt"]
+visible_when = { key = "storage", values = ["file"] }
 
 [[setting]]
 key = "add_creation_date"
@@ -112,3 +141,7 @@ entry = "bar.luau"
   label_key = "settings.hide_when_empty.label"
   description_key = "settings.hide_when_empty.description"
   default = false
+
+[[service]]
+id = "caldav"
+entry = "service.luau"
